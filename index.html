@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0d12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CrispNW" />
+  <meta name="description" content="CrispNW LLC Field Logger — door-to-door canvassing tracker" />
+  <title>CrispNW Field Logger</title>
+
+  <!-- PWA Manifest (inline data URI so this stays a single file) -->
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22CrispNW%20Field%20Logger%22%2C%22short_name%22%3A%22CrispNW%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230d0d12%22%2C%22theme_color%22%3A%22%230d0d12%22%7D" />
+
+  <style>
+    /* ─── Reset & Base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0d0d12;
+      --surface:     #17171f;
+      --surface2:    #1f1f2b;
+      --border:      #2e2e3e;
+      --text:        #f0f0f5;
+      --text-muted:  #9090a8;
+      --accent:      #4f7fff;
+
+      --green:       #22c55e;
+      --green-dim:   #166534;
+      --green-glow:  rgba(34,197,94,0.25);
+
+      --yellow:      #facc15;
+      --yellow-dim:  #713f12;
+      --yellow-glow: rgba(250,204,21,0.25);
+
+      --red:         #ef4444;
+      --red-dim:     #7f1d1d;
+      --red-glow:    rgba(239,68,68,0.25);
+
+      --gray:        #94a3b8;
+      --gray-dim:    #1e293b;
+      --gray-glow:   rgba(148,163,184,0.2);
+
+      --radius:      14px;
+      --min-tap:     64px;
+      --font:        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;          /* dynamic viewport height — avoids iOS URL bar issues */
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    /* ─── Header ────────────────────────────────────────────── */
+    header {
+      padding: 14px 20px 10px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+
+    .logo-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ─── GPS Badge ─────────────────────────────────────────── */
+    #gps-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 12px 5px 8px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: color 0.3s, border-color 0.3s;
+    }
+
+    #gps-badge.locked {
+      color: var(--green);
+      border-color: var(--green-dim);
+    }
+
+    #gps-badge.error {
+      color: var(--red);
+      border-color: var(--red-dim);
+    }
+
+    .gps-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    #gps-badge.locked .gps-dot  { background: var(--green); animation: pulse 2s infinite; }
+    #gps-badge.error  .gps-dot  { background: var(--red); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* ─── Main Content ──────────────────────────────────────── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 16px 8px;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    /* ─── Section Labels ────────────────────────────────────── */
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      padding-left: 2px;
+    }
+
+    /* ─── Status Buttons ────────────────────────────────────── */
+    .btn-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .status-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      min-height: var(--min-tap);
+      padding: 0 20px;
+      border: 2px solid transparent;
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.08s;
+      user-select: none;
+      letter-spacing: 0.01em;
+    }
+
+    .status-btn:active { transform: scale(0.98); }
+
+    .btn-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .btn-label { flex: 1; }
+
+    .btn-check {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    /* Interested — Green */
+    .status-btn[data-status="Interested"] {
+      border-color: var(--green-dim);
+    }
+    .status-btn[data-status="Interested"].selected,
+    .status-btn[data-status="Interested"]:hover {
+      background: rgba(34,197,94,0.12);
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px var(--green-glow);
+    }
+    .status-btn[data-status="Interested"].selected .btn-check {
+      background: var(--green);
+      border-color: var(--green);
+      color: #000;
+    }
+
+    /* Maybe — Yellow */
+    .status-btn[data-status="Maybe"] {
+      border-color: var(--yellow-dim);
+    }
+    .status-btn[data-status="Maybe"].selected,
+    .status-btn[data-status="Maybe"]:hover {
+      background: rgba(250,204,21,0.10);
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 3px var(--yellow-glow);
+    }
+    .status-btn[data-status="Maybe"].selected .btn-check {
+      background: var(--yellow);
+      border-color: var(--yellow);
+      color: #000;
+    }
+
+    /* Not Home — Red */
+    .status-btn[data-status="Not Home"] {
+      border-color: var(--red-dim);
+    }
+    .status-btn[data-status="Not Home"].selected,
+    .status-btn[data-status="Not Home"]:hover {
+      background: rgba(239,68,68,0.10);
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px var(--red-glow);
+    }
+    .status-btn[data-status="Not Home"].selected .btn-check {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+    }
+
+    /* Skip — Gray */
+    .status-btn[data-status="Skip"] {
+      border-color: #2a3040;
+    }
+    .status-btn[data-status="Skip"].selected,
+    .status-btn[data-status="Skip"]:hover {
+      background: rgba(148,163,184,0.08);
+      border-color: var(--gray);
+      box-shadow: 0 0 0 3px var(--gray-glow);
+    }
+    .status-btn[data-status="Skip"].selected .btn-check {
+      background: var(--gray);
+      border-color: var(--gray);
+      color: #000;
+    }
+
+    /* ─── Notes ─────────────────────────────────────────────── */
+    .notes-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    #notes {
+      width: 100%;
+      min-height: 72px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.95rem;
+      padding: 12px 14px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.5;
+    }
+
+    #notes::placeholder { color: var(--text-muted); }
+
+    #notes:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,127,255,0.2);
+    }
+
+    /* ─── Submit ─────────────────────────────────────────────── */
+    #submit-btn {
+      width: 100%;
+      min-height: var(--min-tap);
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, opacity 0.15s, transform 0.08s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    #submit-btn:active   { transform: scale(0.98); }
+    #submit-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    #submit-btn.loading  { background: #334d99; }
+    #submit-btn.success  { background: var(--green); }
+
+    /* ─── Toast / Feedback ───────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom) + 24px);
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.88rem;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 999px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      z-index: 999;
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #toast.toast-success { background: var(--green-dim); border-color: var(--green); color: #a7f3d0; }
+    #toast.toast-error   { background: var(--red-dim);   border-color: var(--red);   color: #fecaca; }
+    #toast.toast-warn    { background: var(--yellow-dim); border-color: var(--yellow); color: #fde68a; }
+
+    /* ─── Log ───────────────────────────────────────────────── */
+    .log-section {
+      margin-top: 4px;
+    }
+
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    #clear-log {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 4px;
+      font-family: var(--font);
+      text-decoration: underline;
+    }
+
+    #log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .log-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .log-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    .log-dot.Interested { background: var(--green); }
+    .log-dot.Maybe      { background: var(--yellow); }
+    .log-dot.Not-Home   { background: var(--red); }
+    .log-dot.Skip       { background: var(--gray); }
+
+    .log-info { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+    .log-status { font-weight: 600; color: var(--text); }
+    .log-meta   { color: var(--text-muted); line-height: 1.4; }
+    .log-synced  { font-size: 0.65rem; color: var(--green); margin-top: 2px; }
+    .log-pending { font-size: 0.65rem; color: var(--yellow); margin-top: 2px; }
+
+    /* ─── Spacer ─────────────────────────────────────────────── */
+    .spacer { height: 90px; } /* breathing room above the toast */
+
+    /* ─── Sunlight readability boost ────────────────────────── */
+    @media (prefers-color-scheme: light) {
+      /* User forced light? Keep dark anyway via overrides */
+      html { filter: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Header ───────────────────────────────────────────── -->
+  <header>
+    <div class="logo">
+      <span class="logo-title">💧 CrispNW</span>
+      <span class="logo-sub">Field Logger · Carnation, WA</span>
+    </div>
+    <div id="gps-badge">
+      <span class="gps-dot"></span>
+      <span id="gps-label">Acquiring…</span>
+    </div>
+  </header>
+
+  <!-- ── Main ─────────────────────────────────────────────── -->
+  <main>
+
+    <!-- Status Buttons -->
+    <span class="section-label">Select Door Status</span>
+
+    <div class="btn-grid" id="btn-grid">
+
+      <button class="status-btn" data-status="Interested" aria-pressed="false">
+        <span class="btn-icon">🟢</span>
+        <span class="btn-label">Interested</span>
+        <span class="btn-check">✓</span>
+      </button>
+
+      <button class="status-btn" data-status="Maybe" aria-pressed="false">
+        <span class="btn-icon">🟡</span>
+        <span class="btn-label">Maybe</span>
+        <span class="btn-check">✓</span>
+      </button>
+
+      <button class="status-btn" data-status="Not Home" aria-pressed="false">
+        <span class="btn-icon">🔴</span>
+        <span class="btn-label">Not Home</span>
+        <span class="btn-check">✓</span>
+      </button>
+
+      <button class="status-btn" data-status="Skip" aria-pressed="false">
+        <span class="btn-icon">⬜</span>
+        <span class="btn-label">Skip</span>
+        <span class="btn-check">✓</span>
+      </button>
+
+    </div>
+
+    <!-- Notes -->
+    <div class="notes-section">
+      <span class="section-label">Notes <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></span>
+      <textarea id="notes" placeholder="e.g. gate code, call back time, dog in yard…" rows="3" autocomplete="off" autocorrect="on" spellcheck="true"></textarea>
+    </div>
+
+    <!-- Submit -->
+    <button id="submit-btn" disabled>
+      <span id="submit-icon">📍</span>
+      <span id="submit-label">Submit Entry</span>
+    </button>
+
+    <!-- Recent Log -->
+    <div class="log-section">
+      <div class="log-header">
+        <span class="section-label">Recent Entries</span>
+        <button id="clear-log">Clear log</button>
+      </div>
+      <div id="log-list">
+        <p style="font-size:0.78rem;color:var(--text-muted);padding:4px 2px;">No entries yet.</p>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+  </main>
+
+  <!-- ── Toast ─────────────────────────────────────────────── -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ─────────────────────────────────────────────────────────
+       CONFIGURATION — replace these two values before deploying
+  ───────────────────────────────────────────────────────────── -->
+  <script>
+    const CONFIG = {
+      // ① Your Google Sheets API Key
+      API_KEY: 'AIzaSyA5kQiC7GiI8KNf_XbnT4yslGHXVCYDufE',
+
+      // ② The ID from your sheet URL: docs.google.com/spreadsheets/d/<<THIS_PART>>/edit
+      SPREADSHEET_ID: '1ZkHOFiswN83JLggTyE_O3QBkCrtZcga1a-V7hjTqR9o',
+
+      // ③ The tab name inside the spreadsheet
+      SHEET_NAME: 'Leads',
+    };
+  </script>
+
+  <!-- ─────────────────────────────────────────────────────────
+       APP LOGIC
+  ───────────────────────────────────────────────────────────── -->
+  <script>
+  (() => {
+    'use strict';
+
+    // ── State ───────────────────────────────────────────────
+    let selectedStatus = null;   // string | null
+    let gpsCoords      = null;   // { lat, lng, accuracy } | null
+    let gpsWatchId     = null;
+    let isSubmitting   = false;
+    let toastTimer     = null;
+
+    // ── DOM refs ────────────────────────────────────────────
+    const gpsBadge    = document.getElementById('gps-badge');
+    const gpsLabel    = document.getElementById('gps-label');
+    const btnGrid     = document.getElementById('btn-grid');
+    const notesInput  = document.getElementById('notes');
+    const submitBtn   = document.getElementById('submit-btn');
+    const submitIcon  = document.getElementById('submit-icon');
+    const submitLabel = document.getElementById('submit-label');
+    const toast       = document.getElementById('toast');
+    const logList     = document.getElementById('log-list');
+    const clearLogBtn = document.getElementById('clear-log');
+
+    // ── Local log (survives page refresh via sessionStorage) ─
+    let localLog = [];
+    try { localLog = JSON.parse(sessionStorage.getItem('crispnw_log') || '[]'); } catch {}
+    renderLog();
+
+    // ── GPS ─────────────────────────────────────────────────
+    function startGPS() {
+      if (!('geolocation' in navigator)) {
+        setGPSState('error', 'GPS unavailable');
+        return;
+      }
+
+      const opts = { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 };
+
+      gpsWatchId = navigator.geolocation.watchPosition(
+        pos => {
+          gpsCoords = {
+            lat: pos.coords.latitude.toFixed(6),
+            lng: pos.coords.longitude.toFixed(6),
+            accuracy: Math.round(pos.coords.accuracy),
+          };
+          setGPSState('locked', `±${gpsCoords.accuracy}m`);
+          refreshSubmitState();
+        },
+        err => {
+          gpsCoords = null;
+          const msgs = {
+            1: 'Location denied',
+            2: 'GPS error',
+            3: 'GPS timeout',
+          };
+          setGPSState('error', msgs[err.code] || 'GPS error');
+          refreshSubmitState();
+        },
+        opts
+      );
+    }
+
+    function setGPSState(state, text) {
+      gpsBadge.className = state; // 'locked' | 'error' | ''
+      gpsLabel.textContent = text;
+    }
+
+    startGPS();
+
+    // ── Status button selection ──────────────────────────────
+    btnGrid.addEventListener('click', e => {
+      const btn = e.target.closest('.status-btn');
+      if (!btn) return;
+
+      const status = btn.dataset.status;
+
+      // Toggle off if already selected
+      if (selectedStatus === status) {
+        selectedStatus = null;
+        btn.classList.remove('selected');
+        btn.setAttribute('aria-pressed', 'false');
+      } else {
+        // Deselect previous
+        document.querySelectorAll('.status-btn.selected').forEach(b => {
+          b.classList.remove('selected');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        // Select new
+        selectedStatus = status;
+        btn.classList.add('selected');
+        btn.setAttribute('aria-pressed', 'true');
+      }
+
+      refreshSubmitState();
+    });
+
+    // ── Enable/disable submit ────────────────────────────────
+    function refreshSubmitState() {
+      const ready = selectedStatus !== null && !isSubmitting;
+      submitBtn.disabled = !ready;
+
+      if (!selectedStatus) {
+        submitIcon.textContent  = '📍';
+        submitLabel.textContent = 'Select a status above';
+      } else if (!gpsCoords) {
+        submitIcon.textContent  = '⏳';
+        submitLabel.textContent = 'Waiting for GPS…';
+        // Still allow submit — coords may arrive
+      } else {
+        submitIcon.textContent  = '📤';
+        submitLabel.textContent = `Submit  ·  ${selectedStatus}`;
+      }
+    }
+
+    // ── Submit ───────────────────────────────────────────────
+    submitBtn.addEventListener('click', async () => {
+      if (!selectedStatus || isSubmitting) return;
+
+      // Warn but don't block if no GPS yet
+      if (!gpsCoords) {
+        showToast('⚠️ GPS not locked — submitting without coordinates.', 'warn');
+      }
+
+      isSubmitting = true;
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+      submitIcon.textContent  = '⏳';
+      submitLabel.textContent = 'Submitting…';
+
+      const now       = new Date();
+      const timestamp = now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour12: true });
+      const lat       = gpsCoords ? gpsCoords.lat : '';
+      const lng       = gpsCoords ? gpsCoords.lng : '';
+      const notes     = notesInput.value.trim();
+
+      const entry = { timestamp, lat, lng, status: selectedStatus, notes };
+
+      try {
+        await appendToSheet(entry);
+        onSuccess(entry, true);
+      } catch (err) {
+        console.error('Sheets API error:', err);
+        // Save locally so data isn't lost
+        onSuccess(entry, false);
+        showToast('⚠️ Sheet write failed — entry saved locally. Check API config.', 'error', 5000);
+      }
+    });
+
+    function onSuccess(entry, synced) {
+      // Log it
+      localLog.unshift({ ...entry, synced, id: Date.now() });
+      if (localLog.length > 50) localLog.pop();
+      try { sessionStorage.setItem('crispnw_log', JSON.stringify(localLog)); } catch {}
+      renderLog();
+
+      // Visual feedback
+      if (synced) {
+        submitBtn.classList.remove('loading');
+        submitBtn.classList.add('success');
+        submitIcon.textContent  = '✅';
+        submitLabel.textContent = 'Saved to Sheet!';
+        showToast(`✅ ${entry.status} logged successfully`, 'success');
+      }
+
+      // Reset after 1.4s
+      setTimeout(() => {
+        // Deselect buttons
+        document.querySelectorAll('.status-btn.selected').forEach(b => {
+          b.classList.remove('selected');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        selectedStatus = null;
+        notesInput.value = '';
+        submitBtn.classList.remove('loading', 'success');
+        isSubmitting = false;
+        refreshSubmitState();
+      }, 1400);
+    }
+
+    // ── Google Sheets API ────────────────────────────────────
+    async function appendToSheet({ timestamp, lat, lng, status, notes }) {
+      const range  = encodeURIComponent(`${CONFIG.SHEET_NAME}!A:E`);
+      const url    = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS&key=${CONFIG.API_KEY}`;
+
+      const body = {
+        range:  `${CONFIG.SHEET_NAME}!A:E`,
+        majorDimension: 'ROWS',
+        values: [[timestamp, lat, lng, status, notes]],
+      };
+
+      const res = await fetch(url, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errText}`);
+      }
+
+      return res.json();
+    }
+
+    // ── Toast ─────────────────────────────────────────────────
+    function showToast(msg, type = '', duration = 3200) {
+      clearTimeout(toastTimer);
+      toast.textContent = msg;
+      toast.className   = `show toast-${type}`;
+      toastTimer = setTimeout(() => { toast.className = ''; }, duration);
+    }
+
+    // ── Local Log Render ─────────────────────────────────────
+    function renderLog() {
+      if (!localLog.length) {
+        logList.innerHTML = '<p style="font-size:0.78rem;color:var(--text-muted);padding:4px 2px;">No entries yet.</p>';
+        return;
+      }
+
+      logList.innerHTML = localLog.slice(0, 10).map(e => {
+        const dotClass = e.status.replace(' ', '-');
+        const coord = (e.lat && e.lng) ? `${e.lat}, ${e.lng}` : 'No GPS';
+        const noteStr = e.notes ? ` · ${e.notes}` : '';
+        const syncLine = e.synced
+          ? '<span class="log-synced">✓ Synced to Sheet</span>'
+          : '<span class="log-pending">⚠ Not synced</span>';
+        return `
+          <div class="log-item">
+            <span class="log-dot ${dotClass}"></span>
+            <div class="log-info">
+              <span class="log-status">${e.status}</span>
+              <span class="log-meta">${e.timestamp}${noteStr}</span>
+              <span class="log-meta">${coord}</span>
+              ${syncLine}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    clearLogBtn.addEventListener('click', () => {
+      localLog = [];
+      try { sessionStorage.removeItem('crispnw_log'); } catch {}
+      renderLog();
+    });
+
+    // ── PWA Service Worker (inline blob) ─────────────────────
+    // Provides basic installability; caching of the API is intentionally skipped
+    if ('serviceWorker' in navigator) {
+      const swSrc = `
+        const CACHE = 'crispnw-v1';
+        self.addEventListener('install',   () => self.skipWaiting());
+        self.addEventListener('activate',  e  => { e.waitUntil(clients.claim()); });
+        self.addEventListener('fetch', e => {
+          // Only cache same-origin navigation requests (the HTML itself)
+          if (e.request.mode === 'navigate') {
+            e.respondWith(
+              caches.open(CACHE).then(c =>
+                c.match(e.request).then(cached =>
+                  fetch(e.request).then(res => { c.put(e.request, res.clone()); return res; })
+                  .catch(() => cached)
+                )
+              )
+            );
+          }
+        });
+      `;
+      const blob  = new Blob([swSrc], { type: 'application/javascript' });
+      const swURL = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swURL).catch(() => {/* silently ignore in file:// context */});
+    }
+
+  })();
+  </script>
+</body>
+</html>
