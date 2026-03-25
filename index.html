@@ -700,21 +700,12 @@
       }, 1400);
     }
 
-    // ── Google Sheets API ────────────────────────────────────
+    // ── Google Sheets via Apps Script proxy ──────────────────
     async function appendToSheet({ timestamp, lat, lng, status, notes }) {
-      const range  = encodeURIComponent(`${CONFIG.SHEET_NAME}!A:E`);
-      const url    = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS&key=${CONFIG.API_KEY}`;
-
-      const body = {
-        range:  `${CONFIG.SHEET_NAME}!A:E`,
-        majorDimension: 'ROWS',
-        values: [[timestamp, lat, lng, status, notes]],
-      };
-
-      const res = await fetch(url, {
+      const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(body),
+        headers: { 'Content-Type': 'text/plain' },
+        body:    JSON.stringify({ timestamp, lat, lng, status, notes: notes || '' }),
       });
 
       if (!res.ok) {
@@ -722,7 +713,9 @@
         throw new Error(`HTTP ${res.status}: ${errText}`);
       }
 
-      return res.json();
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Apps Script error');
+      return json;
     }
 
     // ── Toast ─────────────────────────────────────────────────
