@@ -7,14 +7,15 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="CrispNW" />
-  <meta name="description" content="CrispNW LLC Field Logger — door-to-door canvassing tracker" />
+  <meta name="description" content="CrispNW LLC Field Logger â door-to-door canvassing tracker" />
   <title>CrispNW Field Logger</title>
+  <!-- build: 1774411599563 -->
 
   <!-- PWA Manifest (inline data URI so this stays a single file) -->
   <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22CrispNW%20Field%20Logger%22%2C%22short_name%22%3A%22CrispNW%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230d0d12%22%2C%22theme_color%22%3A%22%230d0d12%22%7D" />
 
   <style>
-    /* ─── Reset & Base ──────────────────────────────────────── */
+    /* âââ Reset & Base ââââââââââââââââââââââââââââââââââââââââ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -59,11 +60,11 @@
     body {
       display: flex;
       flex-direction: column;
-      min-height: 100dvh;          /* dynamic viewport height — avoids iOS URL bar issues */
+      min-height: 100dvh;          /* dynamic viewport height â avoids iOS URL bar issues */
       padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
-    /* ─── Header ────────────────────────────────────────────── */
+    /* âââ Header ââââââââââââââââââââââââââââââââââââââââââââââ */
     header {
       padding: 14px 20px 10px;
       background: var(--surface);
@@ -94,7 +95,7 @@
       text-transform: uppercase;
     }
 
-    /* ─── GPS Badge ─────────────────────────────────────────── */
+    /* âââ GPS Badge âââââââââââââââââââââââââââââââââââââââââââ */
     #gps-badge {
       display: flex;
       align-items: center;
@@ -135,7 +136,7 @@
       50%       { opacity: 0.3; }
     }
 
-    /* ─── Main Content ──────────────────────────────────────── */
+    /* âââ Main Content ââââââââââââââââââââââââââââââââââââââââ */
     main {
       flex: 1;
       display: flex;
@@ -145,7 +146,7 @@
       overflow-y: auto;
     }
 
-    /* ─── Section Labels ────────────────────────────────────── */
+    /* âââ Section Labels ââââââââââââââââââââââââââââââââââââââ */
     .section-label {
       font-size: 0.7rem;
       font-weight: 600;
@@ -155,7 +156,7 @@
       padding-left: 2px;
     }
 
-    /* ─── Status Buttons ────────────────────────────────────── */
+    /* âââ Status Buttons ââââââââââââââââââââââââââââââââââââââ */
     .btn-grid {
       display: flex;
       flex-direction: column;
@@ -206,7 +207,7 @@
       transition: background 0.15s, border-color 0.15s;
     }
 
-    /* Interested — Green */
+    /* Interested â Green */
     .status-btn[data-status="Interested"] {
       border-color: var(--green-dim);
     }
@@ -222,7 +223,7 @@
       color: #000;
     }
 
-    /* Maybe — Yellow */
+    /* Maybe â Yellow */
     .status-btn[data-status="Maybe"] {
       border-color: var(--yellow-dim);
     }
@@ -238,7 +239,7 @@
       color: #000;
     }
 
-    /* Not Home — Red */
+    /* Not Home â Red */
     .status-btn[data-status="Not Home"] {
       border-color: var(--red-dim);
     }
@@ -254,7 +255,7 @@
       color: #fff;
     }
 
-    /* Skip — Gray */
+    /* Skip â Gray */
     .status-btn[data-status="Skip"] {
       border-color: #2a3040;
     }
@@ -270,7 +271,7 @@
       color: #000;
     }
 
-    /* ─── Notes ─────────────────────────────────────────────── */
+    /* âââ Notes âââââââââââââââââââââââââââââââââââââââââââââââ */
     .notes-section {
       display: flex;
       flex-direction: column;
@@ -300,7 +301,7 @@
       box-shadow: 0 0 0 3px rgba(79,127,255,0.2);
     }
 
-    /* ─── Submit ─────────────────────────────────────────────── */
+    /* âââ Submit âââââââââââââââââââââââââââââââââââââââââââââââ */
     #submit-btn {
       width: 100%;
       min-height: var(--min-tap);
@@ -326,7 +327,7 @@
     #submit-btn.loading  { background: #334d99; }
     #submit-btn.success  { background: var(--green); }
 
-    /* ─── Toast / Feedback ───────────────────────────────────── */
+    /* âââ Toast / Feedback âââââââââââââââââââââââââââââââââââââ */
     #toast {
       position: fixed;
       bottom: calc(env(safe-area-inset-bottom) + 24px);
@@ -357,7 +358,7 @@
     #toast.toast-error   { background: var(--red-dim);   border-color: var(--red);   color: #fecaca; }
     #toast.toast-warn    { background: var(--yellow-dim); border-color: var(--yellow); color: #fde68a; }
 
-    /* ─── Log ───────────────────────────────────────────────── */
+    /* âââ Log âââââââââââââââââââââââââââââââââââââââââââââââââ */
     .log-section {
       margin-top: 4px;
     }
@@ -415,10 +416,10 @@
     .log-synced  { font-size: 0.65rem; color: var(--green); margin-top: 2px; }
     .log-pending { font-size: 0.65rem; color: var(--yellow); margin-top: 2px; }
 
-    /* ─── Spacer ─────────────────────────────────────────────── */
+    /* âââ Spacer âââââââââââââââââââââââââââââââââââââââââââââââ */
     .spacer { height: 90px; } /* breathing room above the toast */
 
-    /* ─── Sunlight readability boost ────────────────────────── */
+    /* âââ Sunlight readability boost ââââââââââââââââââââââââââ */
     @media (prefers-color-scheme: light) {
       /* User forced light? Keep dark anyway via overrides */
       html { filter: none; }
@@ -428,19 +429,19 @@
 
 <body>
 
-  <!-- ── Header ───────────────────────────────────────────── -->
+  <!-- ââ Header âââââââââââââââââââââââââââââââââââââââââââââ -->
   <header>
     <div class="logo">
-      <span class="logo-title">💧 CrispNW</span>
-      <span class="logo-sub">Field Logger · Carnation, WA</span>
+      <span class="logo-title">ð§ CrispNW</span>
+      <span class="logo-sub">Field Logger Â· Carnation, WA</span>
     </div>
     <div id="gps-badge">
       <span class="gps-dot"></span>
-      <span id="gps-label">Acquiring…</span>
+      <span id="gps-label">Acquiringâ¦</span>
     </div>
   </header>
 
-  <!-- ── Main ─────────────────────────────────────────────── -->
+  <!-- ââ Main âââââââââââââââââââââââââââââââââââââââââââââââ -->
   <main>
 
     <!-- Status Buttons -->
@@ -449,27 +450,27 @@
     <div class="btn-grid" id="btn-grid">
 
       <button class="status-btn" data-status="Interested" aria-pressed="false">
-        <span class="btn-icon">🟢</span>
+        <span class="btn-icon">ð¢</span>
         <span class="btn-label">Interested</span>
-        <span class="btn-check">✓</span>
+        <span class="btn-check">â</span>
       </button>
 
       <button class="status-btn" data-status="Maybe" aria-pressed="false">
-        <span class="btn-icon">🟡</span>
+        <span class="btn-icon">ð¡</span>
         <span class="btn-label">Maybe</span>
-        <span class="btn-check">✓</span>
+        <span class="btn-check">â</span>
       </button>
 
       <button class="status-btn" data-status="Not Home" aria-pressed="false">
-        <span class="btn-icon">🔴</span>
+        <span class="btn-icon">ð´</span>
         <span class="btn-label">Not Home</span>
-        <span class="btn-check">✓</span>
+        <span class="btn-check">â</span>
       </button>
 
       <button class="status-btn" data-status="Skip" aria-pressed="false">
-        <span class="btn-icon">⬜</span>
+        <span class="btn-icon">â¬</span>
         <span class="btn-label">Skip</span>
-        <span class="btn-check">✓</span>
+        <span class="btn-check">â</span>
       </button>
 
     </div>
@@ -477,12 +478,12 @@
     <!-- Notes -->
     <div class="notes-section">
       <span class="section-label">Notes <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></span>
-      <textarea id="notes" placeholder="e.g. gate code, call back time, dog in yard…" rows="3" autocomplete="off" autocorrect="on" spellcheck="true"></textarea>
+      <textarea id="notes" placeholder="e.g. gate code, call back time, dog in yardâ¦" rows="3" autocomplete="off" autocorrect="on" spellcheck="true"></textarea>
     </div>
 
     <!-- Submit -->
     <button id="submit-btn" disabled>
-      <span id="submit-icon">📍</span>
+      <span id="submit-icon">ð</span>
       <span id="submit-label">Submit Entry</span>
     </button>
 
@@ -500,40 +501,40 @@
     <div class="spacer"></div>
   </main>
 
-  <!-- ── Toast ─────────────────────────────────────────────── -->
+  <!-- ââ Toast âââââââââââââââââââââââââââââââââââââââââââââââ -->
   <div id="toast" role="status" aria-live="polite"></div>
 
-  <!-- ─────────────────────────────────────────────────────────
-       CONFIGURATION — replace these two values before deploying
-  ───────────────────────────────────────────────────────────── -->
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       CONFIGURATION â replace these two values before deploying
+  âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <script>
     const CONFIG = {
-      // ① Your Google Sheets API Key
+      // â  Your Google Sheets API Key
       API_KEY: 'AIzaSyA5kQiC7GiI8KNf_XbnT4yslGHXVCYDufE',
 
-      // ② The ID from your sheet URL: docs.google.com/spreadsheets/d/<<THIS_PART>>/edit
+      // â¡ The ID from your sheet URL: docs.google.com/spreadsheets/d/<<THIS_PART>>/edit
       SPREADSHEET_ID: '1ZkHOFiswN83JLggTyE_O3QBkCrtZcga1a-V7hjTqR9o',
 
-      // ③ The tab name inside the spreadsheet
+      // â¢ The tab name inside the spreadsheet
       SHEET_NAME: 'Leads',
     };
   </script>
 
-  <!-- ─────────────────────────────────────────────────────────
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
        APP LOGIC
-  ───────────────────────────────────────────────────────────── -->
+  âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <script>
   (() => {
     'use strict';
 
-    // ── State ───────────────────────────────────────────────
+    // ââ State âââââââââââââââââââââââââââââââââââââââââââââââ
     let selectedStatus = null;   // string | null
     let gpsCoords      = null;   // { lat, lng, accuracy } | null
     let gpsWatchId     = null;
     let isSubmitting   = false;
     let toastTimer     = null;
 
-    // ── DOM refs ────────────────────────────────────────────
+    // ââ DOM refs ââââââââââââââââââââââââââââââââââââââââââââ
     const gpsBadge    = document.getElementById('gps-badge');
     const gpsLabel    = document.getElementById('gps-label');
     const btnGrid     = document.getElementById('btn-grid');
@@ -545,12 +546,12 @@
     const logList     = document.getElementById('log-list');
     const clearLogBtn = document.getElementById('clear-log');
 
-    // ── Local log (survives page refresh via sessionStorage) ─
+    // ââ Local log (survives page refresh via sessionStorage) â
     let localLog = [];
     try { localLog = JSON.parse(sessionStorage.getItem('crispnw_log') || '[]'); } catch {}
     renderLog();
 
-    // ── GPS ─────────────────────────────────────────────────
+    // ââ GPS âââââââââââââââââââââââââââââââââââââââââââââââââ
     function startGPS() {
       if (!('geolocation' in navigator)) {
         setGPSState('error', 'GPS unavailable');
@@ -566,7 +567,7 @@
             lng: pos.coords.longitude.toFixed(6),
             accuracy: Math.round(pos.coords.accuracy),
           };
-          setGPSState('locked', `±${gpsCoords.accuracy}m`);
+          setGPSState('locked', `Â±${gpsCoords.accuracy}m`);
           refreshSubmitState();
         },
         err => {
@@ -590,7 +591,7 @@
 
     startGPS();
 
-    // ── Status button selection ──────────────────────────────
+    // ââ Status button selection ââââââââââââââââââââââââââââââ
     btnGrid.addEventListener('click', e => {
       const btn = e.target.closest('.status-btn');
       if (!btn) return;
@@ -617,38 +618,38 @@
       refreshSubmitState();
     });
 
-    // ── Enable/disable submit ────────────────────────────────
+    // ââ Enable/disable submit ââââââââââââââââââââââââââââââââ
     function refreshSubmitState() {
       const ready = selectedStatus !== null && !isSubmitting;
       submitBtn.disabled = !ready;
 
       if (!selectedStatus) {
-        submitIcon.textContent  = '📍';
+        submitIcon.textContent  = 'ð';
         submitLabel.textContent = 'Select a status above';
       } else if (!gpsCoords) {
-        submitIcon.textContent  = '⏳';
-        submitLabel.textContent = 'Waiting for GPS…';
-        // Still allow submit — coords may arrive
+        submitIcon.textContent  = 'â³';
+        submitLabel.textContent = 'Waiting for GPSâ¦';
+        // Still allow submit â coords may arrive
       } else {
-        submitIcon.textContent  = '📤';
-        submitLabel.textContent = `Submit  ·  ${selectedStatus}`;
+        submitIcon.textContent  = 'ð¤';
+        submitLabel.textContent = `Submit  Â·  ${selectedStatus}`;
       }
     }
 
-    // ── Submit ───────────────────────────────────────────────
+    // ââ Submit âââââââââââââââââââââââââââââââââââââââââââââââ
     submitBtn.addEventListener('click', async () => {
       if (!selectedStatus || isSubmitting) return;
 
       // Warn but don't block if no GPS yet
       if (!gpsCoords) {
-        showToast('⚠️ GPS not locked — submitting without coordinates.', 'warn');
+        showToast('â ï¸ GPS not locked â submitting without coordinates.', 'warn');
       }
 
       isSubmitting = true;
       submitBtn.disabled = true;
       submitBtn.classList.add('loading');
-      submitIcon.textContent  = '⏳';
-      submitLabel.textContent = 'Submitting…';
+      submitIcon.textContent  = 'â³';
+      submitLabel.textContent = 'Submittingâ¦';
 
       const now       = new Date();
       const timestamp = now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour12: true });
@@ -665,7 +666,7 @@
         console.error('Sheets API error:', err);
         // Save locally so data isn't lost
         onSuccess(entry, false);
-        showToast('⚠️ Sheet write failed — entry saved locally. Check API config.', 'error', 5000);
+        showToast('â ï¸ Sheet write failed â entry saved locally. Check API config.', 'error', 5000);
       }
     });
 
@@ -680,9 +681,9 @@
       if (synced) {
         submitBtn.classList.remove('loading');
         submitBtn.classList.add('success');
-        submitIcon.textContent  = '✅';
+        submitIcon.textContent  = 'â';
         submitLabel.textContent = 'Saved to Sheet!';
-        showToast(`✅ ${entry.status} logged successfully`, 'success');
+        showToast(`â ${entry.status} logged successfully`, 'success');
       }
 
       // Reset after 1.4s
@@ -700,7 +701,7 @@
       }, 1400);
     }
 
-    // ── Google Sheets via Apps Script proxy ──────────────────
+    // ââ Google Sheets via Apps Script proxy ââââââââââââââââââ
     async function appendToSheet({ timestamp, lat, lng, status, notes }) {
       const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
         method:  'POST',
@@ -718,7 +719,7 @@
       return json;
     }
 
-    // ── Toast ─────────────────────────────────────────────────
+    // ââ Toast âââââââââââââââââââââââââââââââââââââââââââââââââ
     function showToast(msg, type = '', duration = 3200) {
       clearTimeout(toastTimer);
       toast.textContent = msg;
@@ -726,7 +727,7 @@
       toastTimer = setTimeout(() => { toast.className = ''; }, duration);
     }
 
-    // ── Local Log Render ─────────────────────────────────────
+    // ââ Local Log Render âââââââââââââââââââââââââââââââââââââ
     function renderLog() {
       if (!localLog.length) {
         logList.innerHTML = '<p style="font-size:0.78rem;color:var(--text-muted);padding:4px 2px;">No entries yet.</p>';
@@ -736,10 +737,10 @@
       logList.innerHTML = localLog.slice(0, 10).map(e => {
         const dotClass = e.status.replace(' ', '-');
         const coord = (e.lat && e.lng) ? `${e.lat}, ${e.lng}` : 'No GPS';
-        const noteStr = e.notes ? ` · ${e.notes}` : '';
+        const noteStr = e.notes ? ` Â· ${e.notes}` : '';
         const syncLine = e.synced
-          ? '<span class="log-synced">✓ Synced to Sheet</span>'
-          : '<span class="log-pending">⚠ Not synced</span>';
+          ? '<span class="log-synced">â Synced to Sheet</span>'
+          : '<span class="log-pending">â  Not synced</span>';
         return `
           <div class="log-item">
             <span class="log-dot ${dotClass}"></span>
@@ -759,7 +760,7 @@
       renderLog();
     });
 
-    // ── PWA Service Worker (inline blob) ─────────────────────
+    // ââ PWA Service Worker (inline blob) âââââââââââââââââââââ
     // Provides basic installability; caching of the API is intentionally skipped
     if ('serviceWorker' in navigator) {
       const swSrc = `
